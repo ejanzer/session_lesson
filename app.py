@@ -4,7 +4,7 @@ import model
 app = Flask(__name__)
 app.secret_key = "shhhhthisisasecret"
 
-@app.route("/")
+@app.route("/") # Default is GET request
 def index():
     return render_template("index.html")
 
@@ -12,7 +12,7 @@ def index():
 def process_login():
     return render_template("login.html")
 
-@app.route("/youshouldprobablychangethisurl")
+@app.route("/register")
 def register():
     return render_template("register.html")
 
