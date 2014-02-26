@@ -6,8 +6,8 @@ app.secret_key = "shhhhthisisasecret"
 
 @app.route("/") # Default is GET request
 def index():
-    if session.get("username"):
-        return "User %s is logged in!" % session['username']
+    if session.get("user_id"):
+        return "User %s is logged in!" % session['user_id']
     else:
         return render_template("index.html")
 
@@ -16,11 +16,11 @@ def process_login():
     username = request.form.get("username")
     password = request.form.get("password")
 
-    username = model.authenticate(username, password)
+    user_id = model.authenticate(username, password)
 
-    if username != None:
+    if user_id != None:
         flash("User authenticated!") 
-        session['username'] = username
+        session['user_id'] = user_id
     else:
         flash("Password incorrect, there may be an issue.") 
     
@@ -34,6 +34,13 @@ def register():
 def logout():
     session.clear()
     return redirect(url_for("index"))
+
+@app.route("/user/<username>")
+def view_user(username):
+    user_id = get_user_by_name(username)
+    
+    return #redirect(url_for("index"))
+
 
 if __name__ == "__main__":
     app.run(debug = True)
