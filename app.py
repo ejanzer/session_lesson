@@ -37,9 +37,22 @@ def logout():
 
 @app.route("/user/<username>")
 def view_user(username):
-    user_id = get_user_by_name(username)
-    
-    return #redirect(url_for("index"))
+    check_logged_in = session.get("user_id")
+
+    user_id = model.get_user_by_name(username)
+    #wall_posts is a list of tuples
+    wall_posts = model.get_wall_by_user(user_id)
+    html = render_template("mypage.html", wall_posts=wall_posts, check_logged_in=check_logged_in, username=username)
+    return html
+
+@app.route("/user/<username>", methods=["POST"])
+def post_to_wall(username):
+    #request.form is dictionary from form with method post 
+    content = request.form.get("content")
+    author_id = session.get("user_id")
+    owner_id = model.get_user_by_name(username)
+    model.post_to_wall(owner_id, author_id, content)
+    return redirect(url_for("view_user",username=username ))
 
 
 if __name__ == "__main__":

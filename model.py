@@ -33,8 +33,17 @@ def get_user_by_name(username):
 def get_wall_by_user(user_id):
     connect_to_db()
     #working on this query still
-    query = """SELECT username, content, created_at FROM wall_posts JOIN users ON users.id = wall_posts.author_id  WHERE owner_id = ?"""
+    query = """SELECT username, content, created_at 
+    FROM wall_posts JOIN users ON users.id = wall_posts.author_id  WHERE owner_id = ?"""
     DB.execute(query, (user_id,))
-    row = DB.fetchone()
-    #row[0] is user id
-    return row[0]    
+    posts = DB.fetchall()
+    #posts[]
+    return posts   
+
+
+def post_to_wall(owner_id, author_id, content):
+    connect_to_db()
+    query = """INSERT into wall_posts (owner_id, author_id, content) 
+    VALUES (?,?,?)"""  
+    DB.execute(query,(owner_id, author_id, content,))
+    CONN.commit()

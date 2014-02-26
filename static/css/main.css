@@ -14,3 +14,25 @@ form.signin input.form-control {
 form.signin input.btn {
     margin-top: 15px;
 }
+
+div.post {
+    margin: 10px auto;
+    width:100%;
+}
+
+form.wall_poster {
+    width: 600px;
+}
+
+div.wall {
+    /*margin: 50px auto;*/
+    border: 1px solid blue;
+    border-radius: 8px;
+    background-color: white;
+    width: 600px;
+}
+
+span.username {
+    font-weight: bold;
+    color: blue;
+} 
