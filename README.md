@@ -208,10 +208,10 @@ In Flask, the session takes the form of a dictionary named `session`. Here's how
 
         username = model.authenticate(username, password)
         if username != None
-            flash('message') = "User authenticated!"
+            flash("User authenticated!")
             session['username'] = username
         else:
-            flash('message') = "Password incorrect, there may be a ferret stampede in progress!"
+            flash("Password incorrect, there may be a ferret stampede in progress!")
 
         return redirect(url_for("index"))
 
