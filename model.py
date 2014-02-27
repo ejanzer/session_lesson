@@ -15,7 +15,9 @@ def authenticate(username, password):
     row = DB.fetchone()
     #row[0] is username, row[1] is password, row[2] is user id
     #temp fix changed password from database to int so it evaluates true
-    if username == row[0] and hash(password) == int(row[1]):
+    if row == None:
+        return None
+    elif username == row[0] and hash(password) == int(row[1]):
         #returns user id
         return row[2]
     else:    
@@ -28,6 +30,17 @@ def get_user_by_name(username):
     DB.execute(query, (username,))
     row = DB.fetchone()
     #row[0] is user id
+    if row == None:
+        return None
+    else:
+        return row[0]
+
+def get_name_by_user(user_id):
+    connect_to_db()
+    query = """SELECT username FROM users WHERE id = ?"""
+    DB.execute(query, (user_id,))
+    row = DB.fetchone()
+    #row[0] is username
     return row[0]
 
 def get_wall_by_user(user_id):
@@ -47,3 +60,14 @@ def post_to_wall(owner_id, author_id, content):
     VALUES (?,?,?)"""  
     DB.execute(query,(owner_id, author_id, content,))
     CONN.commit()
+
+
+
+def make_new_user(username, password):
+    #password gets stored as the hash of password security yah.
+    password = hash(password)
+    connect_to_db()
+    query = """INSERT into users (username, password) 
+    VALUES (?,?)"""  
+    DB.execute(query,(username, password,))
+    CONN.commit()    

@@ -4,6 +4,11 @@
 
 <h1>{{ username }}</h1>
 {% if check_logged_in %}
+<ul>
+    {% for message in get_flashed_messages()%}
+        <li>{{ message }}</li>
+    {% endfor %}
+    </ul> 
 <form class="wall_poster" method="POST">
 <h2 class="signin-heading">Post to wall</h2>
     <input type="text" class="form-control" placeholder="write post here" name="content">
