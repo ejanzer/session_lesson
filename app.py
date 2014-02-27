@@ -4,11 +4,11 @@ import model
 app = Flask(__name__)
 app.secret_key = "shhhhthisisasecret"
 
-#when user first arrives at site login page
-@app.route("/") # Default is GET request
+# handler for /
+@app.route("/") 
 def index():
+    """Handler for /. Redirects to login page if not logged in."""
     user_id = session.get("user_id")
-    #check if the user is already logged in if so send them to their page
     if session.get("user_id"):
         username = model.get_name_by_user(user_id)
         flash("Welcome %s" % username)
@@ -16,70 +16,83 @@ def index():
     else:
     #otherwise send user to login page    
         return render_template("index.html")
-#this handler gets activated when user uses log in form which is set to method: post
+
+# handler for login form
 @app.route("/", methods=["POST"])
-#once login submitted get from the form submission the username and password
 def process_login():
     username = request.form.get("username")
     password = request.form.get("password")
-    #and use the authenticate function to check if username and password match
+
+    # authenticate user. if authenticated, returns id. else, returns None
     user_id = model.authenticate(username, password)
 
     if user_id != None:
-        # flash("User authenticated!") 
-        #setting the session user id to the user's user_id 
+        # if user authenticated, set the user_id on the session
         session['user_id'] = user_id
     else:
-        #if password entered incorrectly also if username doesn't exist
-        flash("Password or username incorrect, there may be an issue.") 
-    #send them back to login if there is an issue here
-    #we are redirecting them either way here but it checks again if they are logged in    
+        # if not authenticated, flash an error message
+        flash("Password or username incorrect. Please try again.") 
+    
+    # everyone redirects to index. if auth, this will redirect again to wall. 
+    # this seems unnecessary - should we just put it in the if/else?  
     return redirect(url_for("index"))
-#when user clicks on register from login page
+
+# handler for /register (from login page)
 @app.route("/register")
 def register():
-    #this get the user_id from session if it exists
+    # if user is logged in, redirect to their wall
+    # otherwise, else send to register.html
     user_id = session.get("user_id")
     if user_id:
-        #if you are logged in it redirects your to your own page
         username = model.get_name_by_user(user_id)
         return redirect(url_for("view_user",username=username ))
     else:   
-    #if user is not logged it sends you to register page 
         return render_template("register.html")
-#we don't yet have a logout button, but if logout in url session gets erased
+
+# TODO: add logout link in template
 @app.route("/logout")
 def logout():
+    # clear session and redirect to login
     session.clear()
-    #and user gets redirected to login page
     return redirect(url_for("index"))
-#view a specific users page, user gets sent here to their own page after logging in
+
+# handler for viewing a user's wall
 @app.route("/user/<username>")
 def view_user(username):
+    # TODO: How do you navigate to other users' walls?
+    # TODO: Sort & display by datetime
+
+    # check if the user is logged in. 
+    # the template uses this to determine whether or not to display wall post form
     check_logged_in = session.get("user_id")
 
+    # get user_id for the owner of the page
     user_id = model.get_user_by_name(username)
     if user_id == None:
         flash("That user does not exist.")
+        # Is this where we should redirect to?
         return redirect(url_for("register"))
     else: 
-        #wall_posts is a list of tuples
+        # get list of wall_posts from database
+        # wall_posts is a list of tuples
         wall_posts = model.get_wall_by_user(user_id)
-        #this generates the wall page from template these variable are for jinja to include{{}}
-        html = render_template("mypage.html", wall_posts=wall_posts, check_logged_in=check_logged_in, username=username)
+
+        html = render_template("wall.html", wall_posts=wall_posts, check_logged_in=check_logged_in, username=username)
         return html
 
-#this get's activated when user is on someone's wall and they submit post
+# handler for posting on a user's wall
 @app.route("/user/<username>", methods=["POST"])
 def post_to_wall(username):
+    # TODO: Add datetime
+
     #request.form is dictionary from form with method post 
     # get content from submitted form
     content = request.form.get("content")
 
-    #get the current user from the session
+    #get the id of the current user from the session
     author_id = session.get("user_id")
 
-    # look up the person whose page it is
+    # look up the owner of the page
     owner_id = model.get_user_by_name(username)
 
     # add post to database
@@ -89,36 +102,40 @@ def post_to_wall(username):
     # url_for is a flask function that finds the right url based on handler name
     return redirect(url_for("view_user",username=username ))
 
-# handler for when a user creates a new account on the register page (form method set to POST)
+# handler for when a user creates a new account (form method set to POST)
 @app.route("/register", methods=["POST"])
 def create_account():
 
-    # get username and password and verify_password from form data
-    username= request.form.get("username")
-    password= request.form.get("password")
-    verify_password= request.form.get("password_verify")
+    # get username, password and verify_password from form data
+    username = request.form.get("username")
+    password = request.form.get("password")
+    verify_password = request.form.get("password_verify")
 
     # get user id from session, if it exists
     user_id = session.get("user_id")
     if user_id:
-        # if the user is logged in, send them to their own page
+        # if the user is logged in, send them to their own wall
         username = model.get_name_by_user(user_id)
-        return redirect(url_for("view_user",username=username )) 
+        return redirect(url_for("view_user",username=username)) 
+
+    # if username is already in the database, flash error message and redirect to same page
     elif model.get_user_by_name(username) != None:
-        # if username is already in the database, flash error message and redirect to same page
         flash("That username is taken, please try another")
         return redirect(url_for("register"))
+
+    # if the passwords don't match, flash error message and redirect
     elif verify_password != password:
-        # if the passwords don't match, flash error message and redirect
         flash("Your passwords didn't match")
         return redirect(url_for("register"))
+
     #check if password verify matches password
     else:
         # if they passed all those checks, create a new user in the database
         # and redirect to their own page
         model.make_new_user(username, password)
+
         # flashed messages are fetched using flask function in the jinja template
-        # in HTML call get_flashed_messages() to display
+        # in HTML, call get_flashed_messages() to display
         flash("Your account has been created please login") 
         return redirect(url_for("index"))
 
