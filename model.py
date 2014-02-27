@@ -55,19 +55,19 @@ def get_wall_by_user(user_id):
     """Fetch all the posts on a user's wall."""
     connect_to_db()
     query = """SELECT username, content, created_at 
-    FROM wall_posts JOIN users ON users.id = wall_posts.author_id  WHERE owner_id = ?"""
+    FROM wall_posts JOIN users ON users.id = wall_posts.author_id  WHERE owner_id = ? ORDER BY created_at DESC"""
     DB.execute(query, (user_id,))
     posts = DB.fetchall()
     CONN.close()
     return posts   
 
 
-def post_to_wall(owner_id, author_id, content):
+def post_to_wall(owner_id, author_id, content, current_datetime):
     """Post to a user's wall."""
     connect_to_db()
-    query = """INSERT into wall_posts (owner_id, author_id, content) 
-    VALUES (?,?,?)"""  
-    DB.execute(query,(owner_id, author_id, content,))
+    query = """INSERT into wall_posts (owner_id, author_id, content, created_at) 
+    VALUES (?,?,?, ?)"""  
+    DB.execute(query,(owner_id, author_id, content, current_datetime))
     CONN.commit()
     CONN.close()
 

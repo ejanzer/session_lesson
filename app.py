@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, session, url_for, flash
 import model
+import datetime
 
 app = Flask(__name__)
 app.secret_key = "shhhhthisisasecret"
@@ -95,12 +96,15 @@ def post_to_wall(username):
     # look up the owner of the page
     owner_id = model.get_user_by_name(username)
 
+    # get current datetime
+    current_datetime = datetime.datetime.utcnow()
+
     # add post to database
-    model.post_to_wall(owner_id, author_id, content)
+    model.post_to_wall(owner_id, author_id, content, current_datetime)
 
     # send user back to same page
     # url_for is a flask function that finds the right url based on handler name
-    return redirect(url_for("view_user",username=username ))
+    return redirect(url_for("view_user", username=username))
 
 # handler for when a user creates a new account (form method set to POST)
 @app.route("/register", methods=["POST"])

@@ -2,7 +2,13 @@
 
 {% block body %}
 
+
 <div class="wrapper">
+    {% if check_logged_in %}
+        <div id="navbar">
+            <a href="/logout">Log out</a>
+        </div>
+    {% endif %}
     <h1>{{ username }}</h1>
     {% if check_logged_in %}
     <ul>
@@ -12,7 +18,7 @@
     </ul> 
 
     <form class="wall_poster" method="POST">
-    <h2 class="signin-heading">Post to wall</h2>
+        <label for="content" class="signin-heading">Post to wall</label>
         <input type="text" class="form-control" placeholder="write post here" name="content">
         <input type="submit" class="btn btn-primary btn-lg btn-block" value="Submit">
     </form>
@@ -21,7 +27,7 @@
 <div class="wall">
    
     {% for post in wall_posts %}
-    <div class="post"><span class="username">{{post[0]}}</span> {{post[1]}} {{post[2]}}</div>
+    <div class="post"><span class="username">{{post[0]}}</span> <span class="date">{{post[2]}}</span> <br />{{post[1]}} </div>
     {% endfor %}
 
 </div>
